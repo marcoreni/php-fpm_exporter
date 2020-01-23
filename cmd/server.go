@@ -32,6 +32,7 @@ var (
 	metricsEndpoint  string
 	scrapeURIs       []string
 	fixProcessCount  bool
+	phpValues        []string
 )
 
 // serverCmd represents the server command
@@ -50,7 +51,7 @@ to quickly create a Cobra application.`,
 		pm := phpfpm.PoolManager{}
 
 		for _, uri := range scrapeURIs {
-			pm.Add(uri)
+			pm.Add(uri, phpValues)
 		}
 
 		exporter := phpfpm.NewExporter(pm)
@@ -120,6 +121,7 @@ func init() {
 	serverCmd.Flags().StringVar(&metricsEndpoint, "web.telemetry-path", "/metrics", "Path under which to expose metrics.")
 	serverCmd.Flags().StringSliceVar(&scrapeURIs, "phpfpm.scrape-uri", []string{"tcp://127.0.0.1:9000/status"}, "FastCGI address, e.g. unix:///tmp/php.sock;/status or tcp://127.0.0.1:9000/status")
 	serverCmd.Flags().BoolVar(&fixProcessCount, "phpfpm.fix-process-count", false, "Enable to calculate process numbers via php-fpm_exporter since PHP-FPM sporadically reports wrong active/idle/total process numbers.")
+	serverCmd.Flags().StringSliceVar(&phpValues, "phpfpm.php-value", []string{}, "PHP Value to be added to the request, e.g. error_reporting=E_ALL")
 
 	//viper.BindEnv("web.listen-address", "PHP_FPM_WEB_LISTEN_ADDRESS")
 	//viper.BindPFlag("web.listen-address", serverCmd.Flags().Lookup("web.listen-address"))
@@ -131,6 +133,7 @@ func init() {
 		"PHP_FPM_WEB_TELEMETRY_PATH": "web.telemetry-path",
 		"PHP_FPM_SCRAPE_URI":         "phpfpm.scrape-uri",
 		"PHP_FPM_FIX_PROCESS_COUNT":  "phpfpm.fix-process-count",
+		"PHP_FPM_PHP_VALUE":          "phpfpm.php-value",
 	}
 
 	mapEnvVars(envs, serverCmd)

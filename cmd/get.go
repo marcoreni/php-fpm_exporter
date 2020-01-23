@@ -42,7 +42,7 @@ var getCmd = &cobra.Command{
 		pm := phpfpm.PoolManager{}
 
 		for _, uri := range scrapeURIs {
-			pm.Add(uri)
+			pm.Add(uri, phpValues)
 		}
 
 		if err := pm.Update(); err != nil {
@@ -102,5 +102,6 @@ func init() {
 	// Cobra supports local flags which will only run when this command
 	// is called directly, e.g.:
 	getCmd.Flags().StringSliceVar(&scrapeURIs, "phpfpm.scrape-uri", []string{"tcp://127.0.0.1:9000/status"}, "FastCGI address, e.g. unix:///tmp/php.sock;/status or tcp://127.0.0.1:9000/status")
+	getCmd.Flags().StringSliceVar(&phpValues, "phpfpm.php-value", []string{}, "PHP Value to be added to the request, e.g. error_reporting=E_ALL")
 	getCmd.Flags().StringVar(&output, "out", "text", "Output format. One of: text, json, spew")
 }

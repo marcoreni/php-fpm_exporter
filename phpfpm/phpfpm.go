@@ -83,6 +83,7 @@ type Pool struct {
 	MaxChildrenReached  int64         `json:"max children reached"`
 	SlowRequests        int64         `json:"slow requests"`
 	Processes           []PoolProcess `json:"processes"`
+	PhpValues           []string      `json:"-"`
 }
 
 type requestDuration int64
@@ -115,8 +116,8 @@ type PoolProcessStateCounter struct {
 }
 
 // Add will add a pool to the pool manager based on the given URI.
-func (pm *PoolManager) Add(uri string) Pool {
-	p := Pool{Address: uri}
+func (pm *PoolManager) Add(uri string, phpValues []string) Pool {
+	p := Pool{Address: uri, PhpValues: phpValues}
 	pm.Pools = append(pm.Pools, p)
 	return p
 }
@@ -166,6 +167,10 @@ func (p *Pool) Update() (err error) {
 		"SERVER_SOFTWARE": "go / php-fpm_exporter",
 		"REMOTE_ADDR":     "127.0.0.1",
 		"QUERY_STRING":    "json&full",
+	}
+
+	if len(p.PhpValues) > 0 {
+		env["PHP_VALUE"] = strings.Join(p.PhpValues[:], "\n")
 	}
 
 	resp, err := fcgi.Get(env)
